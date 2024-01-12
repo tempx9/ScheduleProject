@@ -65,39 +65,3 @@ std::string GetTomorrow() {
 string WhatDay() {
     return WeekDay[NumberDayOfWeek()];
 }
-
-// Определить какая сейчас пара (по номеру)
-string WhatLesson() {
-    string num = "";
-
-    time_t t = time(nullptr);
-
-    struct tm now;
-    localtime_r(&t, &now); // Используем localtime_r
-
-    int CurrentTime = now.tm_hour * 60 + now.tm_min;
-
-    if (CurrentTime >= 8 * 60 && CurrentTime <= 9 * 60 + 30) {
-        num = "1";
-    }
-    else if (CurrentTime > 9 * 60 + 30 && CurrentTime <= 11 * 60 + 20) {
-        num = "2";
-    }
-    else if (CurrentTime > 11 * 60 + 20 && CurrentTime <= 13 * 60) {
-        num = "3";
-    }
-    else if (CurrentTime > 13 * 60 && CurrentTime <= 14 * 60 + 50) {
-        num = "4";
-    }
-    else if (CurrentTime > 14 * 60 + 50 && CurrentTime <= 16 * 60 + 30) {
-        num = "5";
-    }
-    else if (CurrentTime > 16 * 60 + 30 && CurrentTime <= 18 * 60 + 10) {
-        num = "6";
-    }
-    else if (CurrentTime > 18 * 60 + 10 && CurrentTime <= 19 * 60 + 50) {
-        num = "7";
-    }
-
-    return num;
-}
