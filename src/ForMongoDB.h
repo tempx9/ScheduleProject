@@ -352,28 +352,21 @@ std::string FindNextLessonForTeacher(const std::string& Teacher, int LessonIndex
             if (!weekSchedule.contains(weekType) || !weekSchedule[weekType].contains(day)) {
                 continue; // Пропускаем, если нет расписания для этой группы в данный день
             }
-                    auto& daySchedule = weekSchedule[weekType][day];
-        LessonIndex++; // Переход к следующему уроку
 
-        if (LessonIndex >= daySchedule.size()) {
-            continue; // Пропускаем, если следующей пары нет
-        }
+            auto& daySchedule = weekSchedule[weekType][day];
+            if (LessonIndex < daySchedule.size()) {
+                auto& lesson = daySchedule[LessonIndex];
+                if (!lesson.is_null() && lesson["Преподаватель"].get<std::string>() == Teacher) {
+                    groupsWithTeacher.push_back(group); // Добавляем группу в список
 
-        for (const auto& lesson : daySchedule) {
-            if (lesson.is_null() || lesson["Преподаватель"].get<std::string>().empty()) {
-                continue; // Пропускаем пустые уроки или уроки без преподавателя
-            }
-
-            if (lesson["Преподаватель"].get<std::string>() == Teacher) {
-                groupsWithTeacher.push_back(group); // Запоминаем группу
-                if (nextLessonName.empty()) { // Запоминаем информацию о следующем уроке
-                    nextLessonName = lesson["Название пары"].get<std::string>();
-                    nextLessonRoom = lesson["Помещение"].get<std::string>();
+                    if (nextLessonName.empty()) { // Запоминаем информацию о следующем уроке
+                        nextLessonName = lesson["Название пары"].get<std::string>();
+                        nextLessonRoom = lesson["Помещение"].get<std::string>();
+                    }
                 }
             }
         }
     }
-}
 
     if (!groupsWithTeacher.empty()) {
         std::ostringstream oss;
@@ -381,16 +374,15 @@ std::string FindNextLessonForTeacher(const std::string& Teacher, int LessonIndex
             << "Название пары: " << nextLessonName << "\n"
             << "Помещение: " << nextLessonRoom << "\n"
             << "Группы: ";
-        for (const auto& group : groupsWithTeacher) {
-            oss << group << " ";
-        }
-        return oss.str();
-    } else {
-        return u8"Для указанных групп `ПИ` не нашлось пар для данного учителя.";
+    for (const auto& group : groupsWithTeacher) {
+        oss << group << ", ";
     }
+    oss.seekp(-2, std::ios_base::end); // Удалить последнюю запятую
+    return oss.str();
+    } else {
+        return u8"Для указанного учителя не нашлось следующей пары.";
+        }
 }
-
-
 
 
 // Определяем в какую функцию послать обрабатываться данные
@@ -399,17 +391,7 @@ std::string getData(const std::string& action_code, const std::string& name, con
 
     if (action_code == "scheduleFor") {
         return ScheduleForDayForStudent(group, day);
-    } else if (action_code == "addCommentary") {
-        return AddCommentary(group, std::stoi(strLessonIndex), Commentary, day, Teacher);
-    } else if (action_code == "whereGroup") {
-        return FindGroupAndLesson(group, std::stoi(strLessonIndex));
-    } else if (action_code == "whereTeacher") {
-        return FindTeacherLocation(Teacher, std::stoi(strLessonIndex));
-    } else if (action_code == "NextLessonForStudent") {
-        return FindNextLessonForStudent(group, std::stoi(strLessonIndex));
-    } else if (action_code == "NextLessonForTeacher") {
-        return FindNextLessonForTeacher(Teacher, std::stoi(strLessonIndex));
-    }
 
     return u8"Произошла ошибка! Попробуйте ещё раз позже, пожалуйста.";
+    }
 }
